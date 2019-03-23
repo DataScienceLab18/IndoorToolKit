@@ -8,5 +8,5 @@
    <p align="center"> Haley Center ( floorplan of 2nd floor at right )</p>
 
 ##  Miscellaneous
-   If you have any question, please contect Hui Bo.
+   If you have any question, please contect Hui Bo (bohui@auburn.edu).
     
