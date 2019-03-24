@@ -1,0 +1,21 @@
+include_directories(${CMAKE_SOURCE_DIR}/src)
+
+add_executable(test_simulation test_simulation.cpp)
+
+target_link_libraries(test_simulation query)
+target_link_libraries(test_simulation simulator)
+target_link_libraries(test_simulation particle)
+target_link_libraries(test_simulation walkinggraph)
+target_link_libraries(test_simulation global)
+
+target_link_libraries(test_simulation gtest gtest_main)
+target_link_libraries(test_simulation pthread)
+
+target_link_libraries(test_simulation CGAL CGAL_Core)
+target_link_libraries(test_simulation gmp)
+
+target_link_libraries(test_simulation boost_random)
+target_link_libraries(test_simulation boost_system)
+target_link_libraries(test_simulation boost_thread)
+
+add_test(test-simulation test_simulation)
