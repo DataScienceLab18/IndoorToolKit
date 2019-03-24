@@ -1,10 +1,10 @@
 # IndoorToolKit
 
 ## Real-world trajectories
-    QuerySimulation-master/data/realData
+    IndoorQuery/data/realData
    We collected moving trajectories at the second floor of Auburn University Haley Center, where 30 rooms are connected to one or more hallways.
   
-   <img src="Haley.jpeg" width="400" align="top" hspace=30>  <img src="QuerySimulation-master/data/my/floorplan-new.png" width="300"> 
+   <img src="Haley.jpeg" width="400" align="top" hspace=20>  <img src="IndoorQuery/data/my/floorplan-new.png" width="380"> 
    <p align="center"> Haley Center ( floorplan of 2nd floor at right )</p>
 
 ##  Miscellaneous
