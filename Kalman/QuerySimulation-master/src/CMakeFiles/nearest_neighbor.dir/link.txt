@@ -1,2 +1,0 @@
-/usr/bin/ar qc libnearest_neighbor.a  CMakeFiles/nearest_neighbor.dir/nearest_neighbor.cpp.o
-/usr/bin/ranlib libnearest_neighbor.a

@@ -1,2 +1,0 @@
-/usr/bin/ar qc librange_query.a  CMakeFiles/range_query.dir/range_query.cpp.o
-/usr/bin/ranlib librange_query.a

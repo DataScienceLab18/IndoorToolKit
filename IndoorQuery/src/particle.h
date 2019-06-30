@@ -20,7 +20,7 @@ class Particle
 
   landmark_t
   advance(double duration = -1.0);
-landmark_t advanceGround(double duration = -1.0,int index=0);
+
   landmark_t
   pos(double t = -1) const;
 

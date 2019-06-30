@@ -5,7 +5,6 @@
 #include <utility>
 #include <map>
 #include <limits>
-#include <time.h>
 
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
@@ -37,7 +36,6 @@ hit(const boost::unordered_map<int, double> &real,
   for (auto it = fake.cbegin(); it != fake.cend(); ++it) {
     if (it->second >= thres) {
       ++b;
-	//cout<<it->first<<":"<<it->second<<endl;
       if (real.end() != real.find(it->first))
         ++a;
     }
@@ -71,7 +69,6 @@ score(const boost::unordered_map<int, double> &real,
   double res = 0.0;
   int cnt = 0;
   double e = std::numeric_limits<double>::epsilon();
-//  cout<<"_______________"<<endl;
   for (auto i = fake.begin(); i != fake.end(); ++i)
     if (i->second >= threshold &&
         real.find(i->first) != real.end()) {
@@ -79,20 +76,12 @@ score(const boost::unordered_map<int, double> &real,
 
       double p = real.at(i->first);
       double q = fake.at(i->first);
-      //cout<<"e:"<<e<<endl;
-      //cout<<"point:"<<i->first<<":"<<p<<"->"<<q<<endl;
+
       if (p <= e)
-      {//cout<<"**1"<<endl;
-        res += (1-p) * log((1-p)/(1-q));}
+        res += (1-p) * log((1-p)/(1-q));
       else if (1-p <= e || 1-q <= e)
-        {res += p * log(p/q);
-        //cout<<"**2"<<endl;
-        }
-      //else res += p * log(p/q);
-      else
-      {//cout<<"**3"<<endl;
-      res += p * log(p/q) + (1-p) * log((1-p)/(1-q));}
-      cout<<"res:"<<res<<endl;
+        res += p * log(p/q);
+      else res += p * log(p/q) + (1-p) * log((1-p)/(1-q));
     }
   return {res, cnt ? res / cnt : 0.0};
 }
@@ -115,13 +104,11 @@ score2(const boost::unordered_map<int, double> &m0,
 void
 test_range_query()
 {
-  const double DURATION = 100;
-  const int NUM_TEST = 2;
-   time_t t_start, t_end;
-   t_start = time(NULL) ;
-   cout<<"time"<<t_start<<endl;
+  const double DURATION = 200;
+  const int NUM_TEST = 100;
+
   using namespace simulation::param;
-  simulation::Simulator sim(_num_object=100);
+  simulation::Simulator sim(_num_object=200);
 
   sim.run(DURATION);
 
@@ -130,9 +117,9 @@ test_range_query()
   boost::random::uniform_real_distribution<>
       unifd(DURATION / 2.0, DURATION * 3.0 / 4.0);
 
-  const std::vector<double> Ratios = {.02};
-//  const std::vector<double> Ratios = {.01,.02,.03,.04,.05};
-  const std::vector<double> Threshold = {0, .35 // , .1, .15, .2, .25, .3,
+  const std::vector<double> Ratios = {.01, .02, .03, .04, .05,
+                                      .06, .07, .08, .09};
+  const std::vector<double> Threshold = {0, 1 // , .1, .15, .2, .25, .3,
                                          // .35, .4, .45
   };
 
@@ -148,7 +135,7 @@ test_range_query()
 
   for (size_t i = 0; i < Ratios.size(); ++i) {
     for (int ts = 0; ts < NUM_TEST; ++ts) {
-    //cout<<"xx"<<ts<<endl;
+
       while (true)
         if (rq.random_window(Ratios[i]))
           break;
@@ -162,20 +149,12 @@ test_range_query()
       }
       boost::unordered_map<int, double> fake = rq.predict();
 
-      std::pair<double, double> t = score(real, fake, Threshold[1]);
+      std::pair<double, double> t = score(real, fake, Threshold[0]);
       if (t.first <= e) {
         --ts;
         continue;
       }
-//        for (auto j = real.begin(); j != real.end(); ++j)
-//        {
-//            cout<<j->first<<":"<<j->second<<endl;
-//        }
-////        cout<<"where:----"<<endl;
-//        for (auto j = fake.begin(); j != fake.end(); ++j)
-//        {
-//            cout<<j->first<<":"<<j->second<<endl;
-//        }
+
       acc[i][0](recall(real, fake));
       acc[i][1](t.second);
       // acc[i][1](recall(real, fake, Threshold[0]));
@@ -187,14 +166,7 @@ test_range_query()
     sprintf(msg, "%02lu / %02lu", i + 1, Ratios.size());
     cout << msg << endl;
   }
-   t_end = time(NULL) ;
-    cout<<"accuracy:"<<boost::accumulators::mean(acc[0][0])<<endl;
-    cout<<"score:"<<boost::accumulators::mean(acc[0][1])<<endl;
-    cout<<"running time:"<< difftime(t_end,t_start)<<endl;
-//    cout<<"score:"<<boost::accumulators::mean(acc[1][1])<<endl;
-//    cout<<"score:"<<boost::accumulators::mean(acc[2][1])<<endl;
-//    cout<<"score:"<<boost::accumulators::mean(acc[3][1])<<endl;
-//    cout<<"score:"<<boost::accumulators::mean(acc[4][1])<<endl;
+
   std::ofstream fout("data.txt");
     for (size_t i = 0; i < Ratios.size(); ++i) {
       // for (size_t j = 0; j < Threshold.size(); ++j)
@@ -205,25 +177,19 @@ test_range_query()
   fout.close();
 }
 
-
 void
 test_knn()
 {
-  const double DURATION = 100;
+  const double DURATION = 200;
   const int NUM_TIMESTAMP = 100;
-  const int N = 50;
+  const int N = 10;
 
-  //const std::vector<int> NumObject = {100, 200, 300, 400, 500,
-    //                                  600, 700, 800, 900, 1000};
+  const std::vector<int> NumObject = {100, 200, 300, 400, 500,
+                                      600, 700, 800, 900, 1000};
 
-  const std::vector<int> NumObject = {100};
-  time_t t_start, t_end;
-t_start = time(NULL) ;
-   cout<<"time"<<t_start<<endl;
   std::vector<std::vector<accumulators> > acc(
       2, std::vector<accumulators>(NumObject.size(), accumulators()));
-  //cout<<NumObject.size()<<endl;
-  for (int ts = 0; ts < NUM_TIMESTAMP; ++ts) {
+
   for (size_t num = 0; num < NumObject.size(); ++num) {
 
     using namespace simulation::param;
@@ -237,25 +203,21 @@ t_start = time(NULL) ;
         unifd(DURATION / 4.0, DURATION * 3.0 / 4.0);
 
     const double e = std::numeric_limits<double>::epsilon();
-    //cout<<e<<endl;
 
+    for (int ts = 0; ts < NUM_TIMESTAMP; ++ts) {
 
       while (true) {
-		 
+
         nn.random_object();
         nn.prepare(unifd(gen));
 
         boost::unordered_map<int, double> real = nn.query(3);
         boost::unordered_map<int, double> fake = nn.predict(3);
-        //cout<<real[0]<<endl;
-	//cout<<fake.first<<endl;
-        std::pair<double, double> t = score(real, fake);
-        if (t.first <= e)
-        {
 
-          cout<<"yy";
+        std::pair<double, double> t = score(real, fake);
+
+        if (t.first <= e)
           continue;
-          }
 
         acc[0][num](recall(real, fake));
         acc[1][num](score(real, fake).second);
@@ -263,15 +225,12 @@ t_start = time(NULL) ;
         break;
       }
 
-
+      // cout << ts << '/' << NUM_TIMESTAMP << endl;
     }
-    cout << ts << '/' << NUM_TIMESTAMP << endl;
-//    cout << num << '/' << NumObject.size() << endl;
+
+    cout << num << '/' << NumObject.size() << endl;
   }
-  t_end = time(NULL) ;
-  cout<<"running time:"<< difftime(t_end,t_start)<<endl;
-   //cout <<'NUM_TIMESTAMP' << NUM_TIMESTAMP << endl;
-  cout<<boost::accumulators::mean(acc[0][0])<<endl;
+
   std::ofstream fout("data.txt");
   for (size_t i = 0; i < NumObject.size(); ++i)
     fout << boost::accumulators::mean(acc[0][i]) << ' '
@@ -280,7 +239,7 @@ t_start = time(NULL) ;
          << boost::accumulators::variance(acc[1][i]) << endl;
   fout.close();
 }
-/*
+
 void
 test_threshold()
 {
@@ -441,10 +400,9 @@ test_knn_cont()
          << boost::accumulators::variance(acc[i]) << endl;
   fout.close();
 }
-*/
+
 int main()
 {
-  cout<<"xx"<<endl;
   test_knn();
   return 0;
 }

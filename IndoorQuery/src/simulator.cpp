@@ -36,7 +36,6 @@ Simulator_impl_::initialize()
 
   for (int i = 0; i < num_object_; ++i)
     objects_.push_back(Particle(g_, i));
-  //cout<<"size="<<objects_.size()<<endl;
 }
 
 std::vector<landmark_t>
@@ -51,7 +50,6 @@ Simulator_impl_::positions(double t)
 boost::unordered_map<int, boost::unordered_map<int, double> >
 Simulator_impl_::predict(double t)
 {
-
   boost::unordered_map<
     int, boost::unordered_map<int, double> > result;
 
@@ -77,7 +75,7 @@ landmark_t
 Simulator_impl_::random_inside_reader(int i) const
 {
   landmark_t pos = g_.reader_pos(i);
-  //cout<<"reader"<<i<<","<<pos.get<0>()<<","<<pos.get<1>()<<","<<pos.get<2>()<<endl;
+
   boost::random::uniform_real_distribution<> unifd(0, 1);
 
   if (unifd(gen) > 0.5) {
@@ -94,38 +92,19 @@ void
 Simulator_impl_::run(double duration)
 {
   // Objects are running for *duration*.
-//  cout<<"x_____________"<<duration<<endl;
   duration_ = duration;
-  int index=0;
-  
   for (auto it = objects_.begin(); it != objects_.end(); ++it)
-  {
     it->advance(duration);
-    index++;
-   }
+
   // Generate readings for all the objects at all timestamps.
   readings_.clear();
   boost::random::uniform_real_distribution<> unifd(0, 1);
-  //cout<<"size:"<<objects_.size()<<endl;
   for (size_t i = 0; i < objects_.size(); ++i) {
     std::vector<int> tmp;
-    //cout<<"duration_"<<duration_<<endl;
     for (int j = 0; j < duration_; ++j) {
-      //cout<<unifd(gen)<<endl;
-      //cout<<success_rate_<<endl;
-      //cout<<success_rate_<<endl;
       if (unifd(gen) > success_rate_) tmp.push_back(-1);
-      else 
-	{
-    	   //cout<<"object:"<<i<<endl;
-    	   //cout<<"duration"<<j<<endl;
-    	   //cout<<objects_[i].pos(j).get<1>()<<endl;
-	   tmp.push_back(g_.detected_by(objects_[i].pos(j), radius_));
-	   //cout<<"pos:"<<j<<":"<<objects_[i].pos(j).get<0>()<<","<<objects_[i].pos(j).get<1>()<<","<<objects_[i].pos(j).get<2>()<<endl;
-	}
+      else tmp.push_back(g_.detected_by(objects_[i].pos(j), radius_));
     }
-    //for(int z=0;z<tmp.size();z++)
-	//cout<<i<<"reading:"<<z<<":"<<tmp[z]<<endl;
     readings_.push_back(tmp);
   }
 }
@@ -136,6 +115,7 @@ Simulator_impl_::predict_(
     int obj, double t, int limit)
 {
   const std::vector<int> &reading = readings_[obj];
+
   // The number of valid readings, i.e. reading >= 0, in [start, end]
   // is *limit*.
   int end = t;
@@ -192,15 +172,13 @@ Simulator_impl_::predict_(
   // Predicting.  During the *remain*, the object's position is
   // unknown, which is exactly what we'd like to predict.
   double remain = t - end;
+
   double prob = 1.0 / num_particle_;
   for (auto it = subparticles.begin(); it != subparticles.end();
        ++it) {
     landmark_t p = it->advance(remain);
-//    cout<<"sub id:"<<it->id()<<endl;
-//    cout<<"g_.align(p):"<<g_.align(p)<<endl;
     out[g_.align(p)][it->id()] += prob;
   }
-//  cout<<"out size:"<<out.size()<<endl;
   return true;
 }
 

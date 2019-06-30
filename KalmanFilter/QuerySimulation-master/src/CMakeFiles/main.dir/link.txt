@@ -1,1 +1,0 @@
-/usr/bin/c++    -rdynamic CMakeFiles/main.dir/main.cpp.o  -o main  -L/home/bo/indoor/IndoorToolKit/Kalman/QuerySimulation-master/src libquery.a libsimulator.a libparticle.a libwalkinggraph.a libglobal.a -lCGAL -lCGAL_Core -lgmp -lboost_system -lboost_random -lboost_thread 

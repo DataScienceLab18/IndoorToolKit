@@ -83,33 +83,25 @@ NearestNeighbor::random_object()
   boost::random::uniform_int_distribution<>
       unifd(0, sim_.num_object_ - 1);
   object_ = unifd(gen);
-  //cout<<"numL:"<<sim_.num_object_<<endl;
-  //cout<<"num:"<<gen<<endl;
-  //cout<<"object of random:"<<object_<<endl;
 }
 
 void
 NearestNeighbor::prepare(double t)
 {
   probs_ = sim_.predict(t);
+
   g_.wg_ = sim_.g_.wg_;
   landmarks_.clear();
-//  cout<<"query time:"<<t<<endl;
-//cout<<"landmarks1_:"<<landmarks_.size()<<endl;
-  std::vector<landmark_t> points = sim_.positions(t);
-  //cout<<points.size()<<endl;
-  for (size_t i = 0; i < points.size(); ++i) {
 
+  std::vector<landmark_t> points = sim_.positions(t);
+
+  for (size_t i = 0; i < points.size(); ++i) {
     landmark_t &p = points[i];
-//    cout<<i<<"point:"<<p.get<0>()<<" to  :  "<<p.get<1>()<<":"<<p.get<2>()<<endl;
     Edge e = g_.wg_.e(p.get<0>(), p.get<1>());
     int s = g_.wg_.vid(boost::source(e, g_.wg_()));
-    //cout<<"s:"<<s<<endl;
-    //cout<<"e:"<<g_.wg_.eid(e)<<endl;
     std::vector<std::pair<int, double> > &vec =
         landmarks_[g_.wg_.eid(e)];
 
-    //cout<<"landmarks2_:"<<landmarks_.size()<<endl;
     if (vec.empty()) vec.push_back({s, 0.0});
 
     vec.push_back({i, s == p.get<0>() ? p.get<2>() : 1 - p.get<2>()});
@@ -118,12 +110,10 @@ NearestNeighbor::prepare(double t)
   {
     int eid = g_.USEREDGE;
     const int idbase_ = g_.OBJECTID;
-    //cout<<"landmarks_:"<<landmarks_.size()<<endl;
+
     for (auto i = landmarks_.begin(); i != landmarks_.end(); ++i) {
       Edge e = g_.wg_.e(i->first);
-//      cout<<"edge:"<<i->first<<endl;
       double w = get(w0_, e);
-//      cout<<"w"<<w<<endl;
       std::vector<std::pair<int, double> > &vec = i->second;
 
       std::stable_sort(vec.begin(), vec.end(),
@@ -149,8 +139,7 @@ NearestNeighbor::prepare(double t)
       else v = boost::target(e, g_.wg_());
 
       Edge t = g_.wg_.adde(u, v, eid++);
-//      cout<<"u:"<<u<<"v:"<<v<<"weight:"<<w * (1 - vec.back().second)<<endl;
-      put(w0_, t,vec.back().second<1?w * (1 - vec.back().second):0);
+      put(w0_, t, w * (1 - vec.back().second));
     }
   }
 
@@ -165,28 +154,20 @@ NearestNeighbor::prepare(double t)
     Vertex v = g_.ag_.addv(object_ + g_.OBJECTID),
            s = g_.ag_.v(points[object_].get<0>()),
            d = g_.ag_.v(points[object_].get<1>());
-//           cout<<"v0 :"<<g_.ag_.v(1)<<endl;
-//    cout<<"new :"<<object_<<endl;
-//    cout<<"new2 :"<<points[object_].get<0>()<<endl;
-//    cout<<"new3 :"<<points[object_].get<1>()<<endl;
-//    cout<<"v"<<v<<endl;
-//    cout<<"s"<<s<<endl;
-//    cout<<"d"<<d<<endl;
+
     Edge e1 = g_.ag_.adde(s, v, eid++),
          e2 = g_.ag_.adde(v, d, eid++);
 
     double p = points[object_].get<2>();
-//    cout<<"p:"<<p<<endl;
-    put(w1_, e1, 0.5);
-    put(w1_, e2, 0.5);
+    put(w1_, e1, p);
+    put(w1_, e2, 1 - p);
   }
 }
 
 struct found_nn {};
 
 class nearest_neighbor_visitor :
-      public boost::default_d
-      ijkstra_visitor
+      public boost::default_dijkstra_visitor
 {
  public:
   nearest_neighbor_visitor(
@@ -216,22 +197,14 @@ boost::unordered_map<int, double>
 NearestNeighbor::query(int k)
 {
   boost::unordered_map<int, double> result;
-
   nearest_neighbor_visitor vis(k, result, g_.OBJECTID);
-//  cout<<"objectTarget"<<object_<<endl;
-//  cout<<"limit"<<g_.OBJECTID<<endl;
+
   try {
     boost::dijkstra_shortest_paths(
         g_.wg_(), g_.wg_.v(object_ + g_.OBJECTID),
         boost::visitor(vis).weight_map(w0_));
-  } catch (found_nn) {
-   cout<<"___error____"<<endl;}
-//  cout<<"_______"<<endl;
-   //cout<<"object"<<result.size()<<endl;
-  for (auto it = result.cbegin(); it != result.cend(); ++it)
-    {
-//        cout<<it->first<<":"<<it->second<<endl;
-    }
+  } catch (found_nn) { }
+
   return result;
 }
 
@@ -249,13 +222,14 @@ class nearest_neighbor_prob_visitor
   {
     int vid = g_.ag_.vid(v);
     auto it = probs_.find(vid);
+
     if (it != probs_.end()) {
       boost::unordered_map<int, double> &objs = it->second;
       for (auto i = objs.begin(); i != objs.end(); ++i) {
         result_[i->first] += i->second;
         p_ += i->second;
       }
-      //cout<<"vid->"<<vid<<":"<<p_<<endl;
+
       if (p_ >= k_)
         throw found_nn();
     }
@@ -271,19 +245,14 @@ boost::unordered_map<int, double>
 NearestNeighbor::predict(int k)
 {
   boost::unordered_map<int, double> result;
-//  cout<<"_______________K:"<<k<<endl;
   nearest_neighbor_prob_visitor vis(k, result);
-//  cout<<"xx"<<k<<endl;
+
   try {
     boost::dijkstra_shortest_paths(
         g_.ag_(), g_.ag_.v(object_ + g_.OBJECTID),
         boost::visitor(vis).weight_map(w1_));
   } catch (found_nn) { }
-//  cout<<"predict_______"<<endl;
-  for (auto it = result.cbegin(); it != result.cend(); ++it)
-    {
-//        cout<<it->first<<":"<<it->second<<endl;
-    }
+
   return result;
 }
 

@@ -15,10 +15,6 @@
 #include "walkinggraph.h"
 #include "global.h"
 
-
-
-using std::cout;
-using std::endl;
 namespace simulation {
 
 Point_2
@@ -73,7 +69,8 @@ void
 WalkingGraph::initialize()
 {
   const std::string Commenter("//");
-  const std::string DataRoot("/home/bo/indoor/IndoorToolKit/QuerySimulation-master/data/my/");
+  const std::string DataRoot("/home/gongzhitaao/Documents/"
+                             "simulator/data/jiao/");
 
   // Read in vertices for walking graph.
   {
@@ -116,7 +113,7 @@ WalkingGraph::initialize()
     std::vector<int> infos;
     std::vector<Point_2> points;
 
-    std::ifstream fin(DataRoot + "rfid.txt");
+    std::ifstream fin(DataRoot + "rfid2.txt");
     std::string line;
     while (std::getline(fin, line)) {
       boost::algorithm::trim_left(line);
@@ -455,13 +452,10 @@ WalkingGraph::detected_by(const landmark_t &pos, double radius)
   Point_2 center = linear_interpolate(
       coord(pos.get<0>()), coord(pos.get<1>()), pos.get<2>());
   Circle_2 circle(center, radius * radius);
-//  cout<<"radius————————"<<radius<<endl;
-//  cout<<pos.get<0>()<<endl;
-//  cout<<pos.get<1>()<<endl;
-//  cout<<pos.get<2>()<<endl;
+
   std::vector<vertex_handle> res;
   readerset_.range_search(circle, std::back_inserter(res));
-//  cout<<"reading:"<<(*res.begin())->info()<<endl;
+
   if (res.empty()) return -1;
 
   return (*res.begin())->info();
