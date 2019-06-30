@@ -58,7 +58,7 @@ class Simulator_impl_
   template <class ArgumentPack>
   Simulator_impl_(const ArgumentPack &args)
       : num_object_(args[param::_num_object])
-      , num_particle_(args[param::_num_particle | 64])
+      , num_particle_(args[param::_num_particle |2])
       , radius_(args[param::_radius | 120.0])
       , unit_(args[param::_unit | 20])
       , knock_door_prob_(args[param::_knock_door_prob | 0.1])

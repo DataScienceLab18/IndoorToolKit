@@ -1,0 +1,2 @@
+/usr/bin/ar qc libquery.a  CMakeFiles/query.dir/range_query.cpp.o CMakeFiles/query.dir/nearest_neighbor.cpp.o
+/usr/bin/ranlib libquery.a

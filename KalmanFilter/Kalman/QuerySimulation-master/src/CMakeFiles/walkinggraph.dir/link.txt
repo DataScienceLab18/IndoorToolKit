@@ -1,0 +1,2 @@
+/usr/bin/ar qc libwalkinggraph.a  CMakeFiles/walkinggraph.dir/walkinggraph.cpp.o
+/usr/bin/ranlib libwalkinggraph.a
