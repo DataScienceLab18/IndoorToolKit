@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/bo/indoor/IndoorToolKit/QuerySimulation-master/src/global.cpp
+global.h
+/home/bo/indoor/IndoorToolKit/QuerySimulation-master/src/global.h
+
+/home/bo/indoor/IndoorToolKit/QuerySimulation-master/src/global.h
+boost/random.hpp
+-
+boost/random/random_device.hpp
+-
+

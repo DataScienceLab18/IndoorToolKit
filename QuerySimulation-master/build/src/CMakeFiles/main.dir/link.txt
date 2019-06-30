@@ -1,0 +1,1 @@
+/usr/bin/c++  -frounding-math -Wall -std=c++11 -O3 -fopenmp  -rdynamic CMakeFiles/main.dir/main.cpp.o  -o main libquery.a libsimulator.a libparticle.a libwalkinggraph.a libglobal.a -lCGAL -lCGAL_Core -lgmp -lboost_system -lboost_random -lboost_thread 
